@@ -2,6 +2,8 @@
 QyverixAI — Test Suite
 Run: cd backend && pytest -v
 """
+import time
+
 import pytest
 from fastapi.testclient import TestClient
 import sys, os
@@ -153,9 +155,16 @@ def test_root():
     assert "version" in data
 
 def test_health():
+    start = time.perf_counter()
     r = client.get("/health")
+    elapsed_ms = (time.perf_counter() - start) * 1000
+
     assert r.status_code == 200
-    assert r.json()["status"] == "ok"
+    data = r.json()
+    assert data["status"] == "ok"
+    assert data["version"] == "3.0.0"
+    assert "message" in data
+    assert elapsed_ms < 500
 
 
 def test_rate_limit_headers_on_success_response():
